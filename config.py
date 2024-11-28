@@ -1,5 +1,7 @@
 import json
+
 from utils.path_utils import get_path
+
 
 class ConfigReader(object):
 

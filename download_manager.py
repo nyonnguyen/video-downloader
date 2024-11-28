@@ -1,16 +1,17 @@
 import re
 import time
 from urllib.parse import urlparse, parse_qs
+
 from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 
+from downloaders.douyin_dl import DouyinDownloader
+from downloaders.ixigua_dl import XiGuaDownloader
+from downloaders.yt_dl import YouTubeDownloader
+from models import DownloadOptions
 from video_element import VideoElement
 from webdriver_helper import WebDriverHelper, locator_parser
-from models import DownloadOptions
 
-from downloaders.ixigua_dl import XiGuaDownloader
-from downloaders.douyin_dl import DouyinDownloader
-from downloaders.yt_dl import YouTubeDownloader
 
 def json_headers(headers) -> dict:
     headers_dict = {key: value for key, value in headers.items()}

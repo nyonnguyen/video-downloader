@@ -1,5 +1,7 @@
 import re
+
 from selenium.webdriver.support.ui import WebDriverWait
+
 
 class VideoElement:
     """

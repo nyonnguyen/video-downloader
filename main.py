@@ -1,4 +1,5 @@
 import sys
+
 from config import ConfigReader
 from download_manager import DownloadManager
 from models import RESOLUTION, DownloadOptions, YouTubeQuality
