@@ -114,7 +114,7 @@ class WebDriverHelper:
                 self.driver.execute_script("window.localStorage.setItem('%s', '%s');" % (key, resolution_value))
 
                 # Attempt to load the video page
-                self.driver.get(video_page_url)
+                self.driver.refresh()
 
                 # Optionally, wait for some condition that confirms the page is loaded
                 if self.wait_until_element_found(By.TAG_NAME, 'video', timeout=timeout):
