@@ -3,7 +3,6 @@ import uuid
 from urllib.parse import urlparse, parse_qs
 
 import requests
-import ffmpeg
 
 from models import DownloadOptions
 from utils.path_utils import create_directory
@@ -206,15 +205,15 @@ class Downloader:
         return True
 
 
-def merge_video_audio(video_file, audio_file, output_file):
-    try:
-        (
-            ffmpeg
-            .input(video_file)
-            .input(audio_file)
-            .output(output_file, c_v='copy', c_a='aac')
-            .run()
-        )
-        print(f"Successfully created {output_file}")
-    except ffmpeg.Error as e:
-        print(f"Error: {e.stderr.decode('utf8')}")
+# def merge_video_audio(video_file, audio_file, output_file):
+#     try:
+#         (
+#             ffmpeg
+#             .input(video_file)
+#             .input(audio_file)
+#             .output(output_file, c_v='copy', c_a='aac')
+#             .run()
+#         )
+#         print(f"Successfully created {output_file}")
+#     except ffmpeg.Error as e:
+#         print(f"Error: {e.stderr.decode('utf8')}")
