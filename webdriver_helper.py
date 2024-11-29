@@ -44,7 +44,7 @@ class WebDriverHelper:
         # Define a request handler to capture the specific request
         count = 0
         def handle_request(request):
-            nonlocal desired_request, count
+            nonlocal request_pattern, desired_request, count
             if request_pattern in request.url:  # Replace with your condition
                 desired_request = request
             else:
@@ -55,8 +55,9 @@ class WebDriverHelper:
 
         # Wait until the request is captured
         while desired_request is None:
-            self.page.wait_for_timeout(timeout)  # Polling interval
-            if count >= 10:
+            self.page.wait_for_timeout(timeout)
+            if count >= 15:
+                count = 0
                 self.page.reload()
 
         return desired_request
