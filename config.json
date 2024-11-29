@@ -1,5 +1,5 @@
 {
-  "browser": "chrome",
+  "browser": "chromium",
   "timeout": 60,
   "apps": [
     {
@@ -7,9 +7,9 @@
       "base_url": "https://www.ixigua.com",
       "fetching_pattern": ".ixigua.com/video",
       "video_url_pattern": "(.*?)\\?",
-      "title_locator": "xpath://div[contains(@class, 'videoTitle')]",
-      "video_locator": "tag:video",
-      "resolution": "P360"
+      "title_locator": "//div[contains(@class, 'videoTitle')]",
+      "video_locator": "video",
+      "resolution": "P1080"
     },
     {
       "name": "youtube",
@@ -19,12 +19,10 @@
     {
       "name": "douyin",
       "base_url": "https://www.douyin.com",
-      "fetching_pattern": "media-video-hvc1",
-      "fetching_audio_pattern": "media-audio-und-mp4a",
-      "video_url_pattern": "(.*media-video-hvc1/).*\\?",
-      "audio_url_pattern": "(.*media-audio-und-mp4a/).*\\?",
-      "title_locator": "tag:h1",
-      "video_locator": "tag:video",
+      "fetching_pattern": "mime_type=video_mp4",
+      "video_url_pattern": "mime_type=video_mp4",
+      "title_locator": "h1",
+      "video_locator": "video",
       "is_audio": true,
       "resolution": "AUTO"
     }

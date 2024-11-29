@@ -1,5 +1,5 @@
 setuptools
-selenium~=4.26.1
+playwright==1.49.0
 requests~=2.32.3
 selenium-wire~=5.1.0
 webdriver-manager~=4.0.2

@@ -28,11 +28,7 @@ class DownloadOptions:
         self.browser = browser
         self.timeout = timeout
         self.params = None
-        self.params_audio = None
         self.headers = None
-        self.headers_audio = None
         self.download_url = None
-        self.download_url_audio = None
         self.video_title = None
-        self.is_audio = app_config.get('is_audio')
         self.resolution = None

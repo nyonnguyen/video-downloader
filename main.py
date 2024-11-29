@@ -27,6 +27,7 @@ if __name__ == '__main__':
 
     options = DownloadOptions(app_config, url, browser=browser, timeout=timeout)
 
+    # download_manager = DownloadManager(options)
     download_manager = DownloadManager(options)
     if 'youtube' not in url:
         # For non-YouTube videos
@@ -36,7 +37,7 @@ if __name__ == '__main__':
         resolution_value = getattr(YouTubeQuality, resolution, YouTubeQuality.BEST)
 
     options.resolution = resolution_value
+    download_manager = DownloadManager(options)
     download_manager.get_download_info()
     downloader = download_manager.get_downloader()
     downloader.download()
-

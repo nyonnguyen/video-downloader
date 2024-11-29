@@ -1,134 +1,81 @@
-import time
-from datetime import datetime
-
-from selenium.common.exceptions import TimeoutException, WebDriverException
-from selenium.webdriver.chrome.service import Service as ChromeService
-from selenium.webdriver.common.by import By
-from selenium.webdriver.firefox.service import Service as FirefoxService
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-from seleniumwire import webdriver  # Use selenium-wire's webdriver
-from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.firefox import GeckoDriverManager
-
-
-def locator_parser(locator):
-    parse_locator = locator.split(':')
-    by = parse_locator[0]
-    locator_str = parse_locator[1]
-    if by == 'xpath':
-        return By.XPATH, locator_str
-    elif by == 'id':
-        return By.ID, locator_str
-    elif by == 'class':
-        return By.CLASS_NAME, locator_str
-    elif by == 'name':
-        return By.NAME, locator_str
-    elif by == 'tag':
-        return By.TAG_NAME, locator_str
-    elif by == 'css':
-        return By.CSS_SELECTOR, locator_str
-    else:
-        raise Exception(f"Invalid locator type: {locator}")
-
+from playwright.sync_api import sync_playwright
 
 class WebDriverHelper:
 
-    def __init__(self, browser='firefox'):
-        if browser == 'firefox':
-            options = webdriver.FirefoxOptions()
-            options.add_argument("--headless")  # Optionally run in headless mode
-            options.set_preference("media.volume_scale", "0.0")
-            self.driver = webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()), options=options)
-        else:
-            options = webdriver.ChromeOptions()
-            options.add_argument("--headless")
-            options.add_argument("--mute-audio")
-            self.driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
-
+    def __init__(self, browser='firefox', headless=True, slow_mo=0):
+        self.playwright = None
+        self.browser_type = browser
+        self.headless = headless
+        self.slow_mo = slow_mo
+        self.browser = None
+        self.context = None
         self.video_page_url = None
         self.resolution = None
+        self.page = None
 
-    def quit(self):
-        self.driver.quit()
-
-    def get_requests(self):
-        return self.driver.requests
-
-    def wait_until_element_found(self, by, value, timeout=10):
+    def launch_browser(self):
         """
-        Waits until the element specified by `by` and `value` is found within the given `timeout`.
-
-        :param driver: Selenium WebDriver instance
-        :param by: By method to locate the element (e.g., By.TAG_NAME)
-        :param value: Value to locate the element (e.g., 'video')
-        :param timeout: Maximum wait time in seconds (default is 10 seconds)
-        :return: WebElement if found, None if not found within the timeout
+        Launch the specified browser using Playwright.
         """
-        try:
-            # Wait for the element to be present
-            element = WebDriverWait(self.driver, timeout).until(
-                EC.presence_of_element_located((by, value))
-            )
-            return element
-        except Exception as e:
-            print(f"Element not found within {timeout} seconds. Error: {e}")
-            return None
+        self.playwright = sync_playwright().start()
+        if self.browser_type in ["chromium", "chrome"]:
+            self.browser = self.playwright.chromium.launch(headless=self.headless, slow_mo=self.slow_mo)
+        elif self.browser_type == "firefox":
+            self.browser = self.playwright.firefox.launch(headless=self.headless, slow_mo=self.slow_mo)
+        elif self.browser_type == "webkit":
+            self.browser = self.playwright.webkit.launch(headless=self.headless, slow_mo=self.slow_mo)
+        else:
+            raise ValueError(f"Unsupported browser type: {self.browser_type}")
 
-    def reload_page(self):
-        self.load_video_page(self.video_page_url, resolution=self.resolution, max_retries=2, timeout=30)
+        # Open a new browser context
+        self.context = self.browser.new_context()
 
-    def load_video_page(self, video_page_url, resolution="auto", max_retries=3, timeout=30):
+    def close_browser(self):
         """
-        Tries to load the video page and checks if the page is loaded successfully.
-        If not, it retries loading the page up to `max_retries` times before raising an error.
-
-        :param resolution: The video resolution to set (default is auto) auto | 360p | 480p | 720p | 1080p
-        :param video_page_url: The URL of the video page to load
-        :param max_retries: Maximum number of retries if page fails to load (default is 3)
-        :param timeout: Maximum wait time for page load (default is 30 seconds)
-        :return: None
+        Close the browser and release resources.
         """
-        self.video_page_url = video_page_url
-        self.resolution = resolution
+        if self.browser:
+            self.browser.close()
+            self.browser = None
+            self.context = None
 
-        print(f"Loading page: {video_page_url}")
-        retries = 0
-        while retries < max_retries:
-            try:
-                # Attempt to load the video page
-                self.driver.get(video_page_url)
+    def get_request_info(self, request_pattern, timeout=100):
+        desired_request = None
+        # Define a request handler to capture the specific request
+        count = 0
+        def handle_request(request):
+            nonlocal desired_request, count
+            print(f"Waiting for video... {count}")
+            if request_pattern in request.url:  # Replace with your condition
+                desired_request = request
+            else:
+                count += 1
 
-                # Optionally, wait for some condition that confirms the page is loaded
-                if self.wait_until_element_found(By.TAG_NAME, 'video', timeout=timeout):
-                    print(f"Page loaded successfully: {video_page_url}")
+        # Attach the event listener
+        self.page.on("request", handle_request)
 
-                # This trick to set video resolution by setting driver local storage
-                # This works for ixigua.com video site
-                # TODO: Test and define the function for this trick
-                # Set video resolution by set driver local storage xgplayer_pc_localSettings-all
-                # Get the current date and time and format it
-                date = datetime.now().strftime("%Y/%m/%d")
-                key = "xgplayer_pc_localSettings-all"
-                resolution_value = '{"definition":"%s","definitionSetDate":"%s"}' % (resolution, date)
-                self.driver.execute_script("window.localStorage.setItem('%s', '%s');" % (key, resolution_value))
+        # Wait until the request is captured
+        while desired_request is None:
+            self.page.wait_for_timeout(timeout)  # Polling interval
+            if count >= 10:
+                self.page.reload()
 
-                # Attempt to load the video page
-                current_url = self.driver.current_url
-                self.driver.get(current_url)
+        return desired_request
 
-                # Optionally, wait for some condition that confirms the page is loaded
-                if self.wait_until_element_found(By.TAG_NAME, 'video', timeout=timeout):
-                    print(f"Reload page again successfully: {video_page_url}")
-                    return  # Page is successfully loaded
+    def get_page(self, url):
+        """
+        Open a new page and navigate to the given URL.
 
-            except (TimeoutException, WebDriverException) as e:
-                retries += 1
-                print(f"Attempt {retries}/{max_retries} failed: {str(e)}. Retrying...")
-                time.sleep(3)  # Optional: wait before retrying
+        :param url: The URL to navigate to.
+        :return: The Page object.
+        """
+        if not self.context:
+            raise RuntimeError("Browser context is not initialized. Call launch_browser() first.")
 
-        raise Exception(f"Failed to load page {video_page_url} after {max_retries} attempts.")
+        page = self.context.new_page()
+        page.goto(url, wait_until='load')
+        self.page = page
+        return page
 
-    def get_video_title(self, by, locator):
-        ele = self.wait_until_element_found(by, locator)
-        return ele.get_attribute('textContent') if ele else ''
+    def get_video_title(self, locator):
+        return self.context.page.locator(locator).text_content()
