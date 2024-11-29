@@ -77,7 +77,7 @@ class Downloader:
             total_parts = (file_size + self.part_size - 1) // self.part_size  # Ceiling division
 
             # Start downloading parts and write them to file
-            with open(f'{self.video_title}.mp4', 'wb') as f:
+            with open(f'output/{self.video_title}.mp4', 'wb') as f:
                 for i in range(total_parts):
                     start = i * self.part_size
                     end = min(start + self.part_size - 1, file_size - 1)
