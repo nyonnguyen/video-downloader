@@ -45,7 +45,6 @@ class WebDriverHelper:
         count = 0
         def handle_request(request):
             nonlocal desired_request, count
-            print(f"Waiting for video... {count}")
             if request_pattern in request.url:  # Replace with your condition
                 desired_request = request
             else:
