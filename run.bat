@@ -6,7 +6,7 @@ REM Activate the virtual environment
 call Scripts\activate
 
 REM Execute the Python script with an input parameter
-python main.py "%1"
+python main.py %*
 
 REM Deactivate the virtual environment (optional)
 deactivate
