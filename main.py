@@ -7,6 +7,7 @@ from models import RESOLUTION, DownloadOptions, YouTubeQuality
 config = ConfigReader('config.json')
 browser = config.get('browser')
 timeout = config.get('timeout')
+output_path = config.get('output_path')
 
 
 
@@ -40,4 +41,4 @@ if __name__ == '__main__':
     download_manager = DownloadManager(options)
     download_manager.get_download_info()
     downloader = download_manager.get_downloader()
-    downloader.download()
+    downloader.download(output_path)

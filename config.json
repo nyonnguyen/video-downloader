@@ -1,5 +1,6 @@
 {
   "browser": "chromium",
+  "output_path": "/Users/nhnguyen/Downloads",
   "timeout": 60,
   "apps": [
     {

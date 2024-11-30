@@ -54,7 +54,7 @@ class Downloader:
         }
         return headers
 
-    def download(self):
+    def download(self, output_path=None):
         """
         Download the video in parts and write them to a file
         """
@@ -77,7 +77,7 @@ class Downloader:
             total_parts = (file_size + self.part_size - 1) // self.part_size  # Ceiling division
 
             # Start downloading parts and write them to file
-            with open(f'output/{self.video_title}.mp4', 'wb') as f:
+            with open(f'{output_path}/{self.video_title}.mp4', 'wb') as f:
                 for i in range(total_parts):
                     start = i * self.part_size
                     end = min(start + self.part_size - 1, file_size - 1)
@@ -96,12 +96,12 @@ class Downloader:
             print("Request failed with status code:", response.status_code)
             return False
 
-    def silent_download(self):
+    def silent_download(self, output_path=None):
         """
         Download the video without printing to console
         """
         try:
-            with open(f'output/{self.video_title}.mp4', 'wb') as f:
+            with open(f'{output_path}/{self.video_title}.mp4', 'wb') as f:
                 response = requests.get(self.download_url, headers=self.headers, params=self.params)
                 if response.status_code in [200, 206]:
                     f.write(response.content)
