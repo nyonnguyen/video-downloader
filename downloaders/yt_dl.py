@@ -28,6 +28,8 @@ class YouTubeDownloader(object):
             'format': self.options.resolution.value,  # Use the selected quality
             'outtmpl': video_name,  # Output file based on quality
             'merge_output_format': 'mp4',  # Merge video and audio if needed
+            'continue': True,
+            'fragment_retries': 10,
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
