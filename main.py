@@ -1,10 +1,14 @@
+import os
 import sys
 
 from config import ConfigReader
 from download_manager import DownloadManager
 from models import RESOLUTION, DownloadOptions, YouTubeQuality
 
-config = ConfigReader('config.json')
+script_dir = os.path.dirname(os.path.abspath(__file__))
+config_path = os.path.join(script_dir, 'config.json')
+
+config = ConfigReader(config_path)
 browser = config.get('browser')
 timeout = config.get('timeout')
 output_path = config.get('output_path')
