@@ -24,8 +24,8 @@ def find_app_config(download_url):
 
 if __name__ == '__main__':
     arguments = sys.argv[1:]
-    url = arguments[0]
-    # url = 'https://www.ixigua.com/7424360313794855439'
+    url = arguments[0]  # url = 'https://www.ixigua.com/7424360313794855439'
+    print(url)
 
     app_config = find_app_config(url)
     resolution = app_config.get('resolution')

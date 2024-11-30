@@ -7,6 +7,7 @@ from models import DownloadOptions
 
 
 def get_video_id_with_source(url: str) -> str:
+    url = url.replace(" ", "")
     parsed_url = urlparse(url)
     domain = parsed_url.netloc
     path = parsed_url.path.strip('/')
