@@ -29,6 +29,7 @@ class YouTubeDownloader(object):
             'outtmpl': video_name,  # Output file based on quality
             'merge_output_format': 'mp4',  # Merge video and audio if needed
             'continue': True,
+            'force_overwrites': True,
             'fragment_retries': 10,
         }
 
