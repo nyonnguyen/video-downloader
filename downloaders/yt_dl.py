@@ -22,7 +22,7 @@ class YouTubeDownloader(object):
         self.options = options
 
     def download_youtube_video(self, output_path):
-        video_name = f"video_{str(uuid.uuid4())}_{self.options.resolution.name.lower()}.mp4"
+        video_name = f"{output_path}/video_{str(uuid.uuid4())}_{self.options.resolution.name.lower()}.mp4"
         ydl_opts = {
             'quiet': False,  # Show download progress
             'format': self.options.resolution.value,  # Use the selected quality
