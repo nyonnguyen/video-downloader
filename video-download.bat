@@ -1,5 +1,9 @@
 @echo off
 
+REM Navigate to the directory of the script
+cd /d "%~dp0"
+
+REM Create a virtual environment
 python -m venv venv
 
 REM Activate the virtual environment
