@@ -4,6 +4,7 @@ from urllib.parse import urlparse, parse_qs
 import requests
 
 from models import DownloadOptions
+from utils.path_utils import format_video_title
 
 
 def get_video_id_with_source(url: str) -> str:
@@ -78,7 +79,8 @@ class Downloader:
             total_parts = (file_size + self.part_size - 1) // self.part_size  # Ceiling division
 
             # Start downloading parts and write them to file
-            with open(f'{output_path}/{self.video_title}.mp4', 'wb') as f:
+            file_name = format_video_title(self.video_title)
+            with open(f'{output_path}/{file_name}.mp4', 'wb') as f:
                 for i in range(total_parts):
                     start = i * self.part_size
                     end = min(start + self.part_size - 1, file_size - 1)
@@ -102,7 +104,8 @@ class Downloader:
         Download the video without printing to console
         """
         try:
-            with open(f'{output_path}/{self.video_title}.mp4', 'wb') as f:
+            file_name = format_video_title(self.video_title)
+            with open(f'{output_path}/{file_name}.mp4', 'wb') as f:
                 response = requests.get(self.download_url, headers=self.headers, params=self.params)
                 if response.status_code in [200, 206]:
                     f.write(response.content)

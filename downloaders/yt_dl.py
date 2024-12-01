@@ -1,19 +1,8 @@
 import os
-import re
 import uuid
-
 import yt_dlp
-
+from utils.path_utils import format_video_title
 from models import DownloadOptions
-
-
-def format_video_title(video_title: str) -> str:
-    # Remove special characters using a regular expression
-    formatted_title = re.sub(r'[^\w\s]', '', video_title)
-    # Replace spaces with underscores
-    formatted_title = formatted_title.replace(' ', '_')
-    # Return the formatted title
-    return formatted_title
 
 
 class YouTubeDownloader(object):
