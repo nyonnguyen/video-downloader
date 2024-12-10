@@ -16,6 +16,8 @@ def create_directory(directory="output"):
 def format_video_title(video_title: str) -> str:
     # Remove special characters using a regular expression
     formatted_title = re.sub(r'[^\w\s]', '', video_title)
+    # Replace spaces by underscore
+    formatted_title = formatted_title.replace(' ', '_')
     # Replace spaces with underscores
     formatted_title = formatted_title.replace(' ', '_')
     # Return the formatted title
