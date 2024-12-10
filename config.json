@@ -9,7 +9,7 @@
       "fetching_pattern": ".ixigua.com/video",
       "video_url_pattern": "(.*?)\\?",
       "title_locator": "//div[contains(@class, 'videoTitle')]",
-      "video_locator": "video",
+      "video_locator": "//video",
       "resolution": "P1080"
     },
     {

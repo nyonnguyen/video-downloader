@@ -27,16 +27,20 @@ class DownloadManager:
 
         title_locator = self.options.app_config.get('title_locator')
         video_locator = self.options.app_config.get('video_locator')
-        try:
-            print("Waiting for video ...")
-            self.options.video_title = f"{page.wait_for_selector(title_locator).text_content()}_{self.options.resolution}"
-            page.wait_for_selector(video_locator)
-        except Exception as e:
-            print("Retrying...")
-            page.reload()
-            self.options.video_title = f"{page.wait_for_selector(title_locator).text_content()}_{self.options.resolution}"
-            page.wait_for_selector(video_locator)
-        print("Found video element")
+        for attempt in range(5):
+            try:
+                print("Waiting for video ...")
+                self.options.video_title = f"{page.wait_for_selector(title_locator).text_content()}_{self.options.resolution}"
+                print(f"Video Title: {self.options.video_title}")
+                page.wait_for_selector(video_locator)
+                print("Found video element")
+                break  # Exit the loop if successful
+            except Exception as e:
+                print(f"Loading error ... {e}")
+                print("Retrying...")
+                page.goto(self.options.input_url)
+        else:
+            print("Failed to find video element after 5 attempts")
 
         if 'ixigua' in self.options.app_config.get('name'):
             set_local_storage(page, self.options.resolution)
