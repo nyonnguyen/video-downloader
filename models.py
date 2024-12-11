@@ -19,6 +19,12 @@ class YouTubeQuality(Enum):
     HIGH_8K = "bv*[height<=4320]+ba/b"  # Best video <= 8K (4320p) with audio
     SUPER_4K = "bv*[height=2160]+ba"  # Strictly 4K video with audio
     SUPER_8K = "bv*[height=4320]+ba"  # Strictly 8K video with audio
+    AUDIO_MP3 = "bestaudio[ext=mp3]"  # Audio only in MP3 format
+    AUDIO_M4A = "bestaudio[ext=m4a]"  # Audio only in M4A format
+    AUDIO_OPUS = "bestaudio[ext=opus]"  # Audio only in OPUS format
+    AUDIO_WEBM = "bestaudio[ext=webm]"  # Audio only in WebM format
+    AUDIO_BEST_CODEC = "bestaudio[acodec=opus]"  # Best audio with OPUS codec
+    AUDIO_STRICT_MP3 = "ba[ext=mp3]/bestaudio[ext=mp3]"  # Strictly MP3 audio
 
 
 class DownloadOptions:

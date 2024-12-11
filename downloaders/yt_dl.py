@@ -2,7 +2,7 @@ import os
 import uuid
 import yt_dlp
 from utils.path_utils import format_video_title
-from models import DownloadOptions
+from models import DownloadOptions, YouTubeQuality
 
 
 class YouTubeDownloader(object):
@@ -11,12 +11,16 @@ class YouTubeDownloader(object):
         self.options = options
 
     def download_youtube_video(self, output_path):
-        video_name = f"{output_path}/video_{str(uuid.uuid4())}_{self.options.resolution.name.lower()}.mp4"
+        file_ext = 'mp4'
+        # read audio_only from options
+        if 'AUDIO' in self.options.resolution.name:
+            file_ext = 'mp3'
+        video_name = f"{output_path}/video_{str(uuid.uuid4())}_{self.options.resolution.name.lower()}.{file_ext}"
         ydl_opts = {
             'quiet': False,  # Show download progress
             'format': self.options.resolution.value,  # Use the selected quality
             'outtmpl': video_name,  # Output file based on quality
-            'merge_output_format': 'mp4',  # Merge video and audio if needed
+            'merge_output_format': f'{file_ext}',  # Merge video and audio if needed
             'continue': True,
             'force_overwrites': True,
             'fragment_retries': 10,
@@ -34,7 +38,10 @@ class YouTubeDownloader(object):
             ydl.download([self.options.download_url])
 
         video_title = format_video_title(self.options.video_title)
-        os.rename(video_name, f"{output_path}/{video_title}.mp4")
+        file_destination = f"{output_path}/{video_title}.{file_ext}"
+        os.rename(video_name, file_destination)
+        print(f"Downloaded video: {file_destination}")
+
 
     def download(self, output_path=None):
         self.options.download_url = self.options.input_url
