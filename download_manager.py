@@ -4,6 +4,7 @@ from urllib.parse import urlparse, parse_qs
 
 from downloaders.douyin_dl import DouyinDownloader
 from downloaders.ixigua_dl import XiGuaDownloader
+from downloaders.tiktok import TiktokDownloader
 from downloaders.yt_dl import YouTubeDownloader
 from models import DownloadOptions
 from webdriver_helper import WebDriverHelper
@@ -17,6 +18,7 @@ def json_headers(headers) -> dict:
 class DownloadManager:
     def __init__(self, download_options: DownloadOptions):
         self.options = download_options
+        self.cookies = None
 
     def get_download_info(self):
         if 'youtube' in self.options.app_config.get('name'):
@@ -27,10 +29,13 @@ class DownloadManager:
 
         title_locator = self.options.app_config.get('title_locator')
         video_locator = self.options.app_config.get('video_locator')
-        for attempt in range(5):
+        for attempt in range(2):
             try:
                 print("Waiting for video ...")
-                self.options.video_title = f"{page.wait_for_selector(title_locator).text_content()}_{self.options.resolution}"
+                if title_locator:
+                    self.options.video_title = f"{page.wait_for_selector(title_locator).text_content()}_{self.options.resolution}"
+                else:
+                    self.options.video_title = None
                 print(f"Video Title: {self.options.video_title}")
                 page.wait_for_selector(video_locator)
                 print("Found video element")
@@ -55,8 +60,10 @@ class DownloadManager:
         parsed_url = urlparse(video_url)
         self.options.params = {key: value[0] for key, value in parse_qs(parsed_url.query).items()}
         self.options.download_url = video_url
-        print(self.options.download_url)
+        print(f"Starting download link: {self.options.download_url}")
 
+        # Save cookies before close browser
+        self.cookies = page.context.cookies()
         browser.close_browser()
 
     def get_downloader(self):
@@ -67,7 +74,10 @@ class DownloadManager:
             return DouyinDownloader(self.options)
         elif 'youtube' in app_name:
             return YouTubeDownloader(self.options)
-        return None
+        elif 'tiktok' in app_name:
+            return TiktokDownloader(self.options, self.cookies)
+        else:
+            raise ValueError(f"Unsupported app: {app_name}")
 
 
 def set_local_storage(page, resolution):

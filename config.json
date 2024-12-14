@@ -26,6 +26,16 @@
       "video_locator": "video",
       "is_audio": true,
       "resolution": "AUTO"
+    },
+    {
+      "name": "tiktok",
+      "base_url": "https://www.tiktok.com",
+      "fetching_pattern": "mime_type=video_mp4",
+      "video_url_pattern": "mime_type=video_mp4",
+      "title_locator": "",
+      "video_locator": "video",
+      "is_audio": true,
+      "resolution": "AUTO"
     }
   ]
 }

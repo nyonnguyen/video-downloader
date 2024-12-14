@@ -9,9 +9,11 @@ class YouTubeDownloader(object):
 
     def __init__(self, options: DownloadOptions):
         self.options = options
+        self.yt_list = []
 
-    def download_youtube_video(self, output_path):
+    def download_yt_video(self, output_path):
         file_ext = 'mp4'
+
         # read audio_only from options
         if 'AUDIO' in self.options.resolution.name:
             file_ext = 'mp3'
@@ -45,4 +47,4 @@ class YouTubeDownloader(object):
 
     def download(self, output_path=None):
         self.options.download_url = self.options.input_url
-        self.download_youtube_video(output_path)
+        self.download_yt_video(output_path)

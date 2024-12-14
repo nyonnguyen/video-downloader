@@ -26,7 +26,8 @@ PART_SIZE = 5 * 1024 * 1024  # 5 MB
 class Downloader:
 
 
-    def __init__(self, options: DownloadOptions, part_size=None):
+    def __init__(self, options: DownloadOptions, cookies=None, part_size=None):
+        self.options = options
         self.base_url = options.app_config.get('base_url')
         self.download_url = options.download_url
         self.params = options.params
@@ -34,9 +35,10 @@ class Downloader:
         self.headers = options.headers or self.get_headers()
         self.video_title = options.video_title or self.parse_video_id()
         self.temp_name = str(uuid.uuid4())
+        self.cookies = cookies
 
     def parse_video_id(self):
-        return get_video_id_with_source(self.download_url)
+        return get_video_id_with_source(self.options.input_url)
 
     def get_headers(self):
         headers = {
@@ -60,10 +62,26 @@ class Downloader:
         """
         Download the video in parts and write them to a file
         """
-        print(f"Downloading video parts...")
-        # Get the first part to determine file size
-        response = requests.get(self.download_url, headers=self.headers, params=self.params)
+        # Prepare cookie if any
+        session = requests.Session()
+        if self.cookies:
+            for cookie in self.cookies:
+                session.cookies.set(
+                    cookie["name"],
+                    cookie["value"],
+                    domain=cookie.get("domain"),
+                    path=cookie.get("path"),
+                    secure=cookie.get("secure"),
+                    rest={"HttpOnly": cookie.get("httpOnly"), "SameSite": cookie.get("sameSite")}
+                )
 
+        session.headers = self.headers
+        session.params = self.params
+        # Get the first part to determine file size
+        print("Try to fetch the video...")
+        response = session.get(self.download_url)
+
+        print("Downloading video parts...")
         # Check for Content-Range header
         if response.status_code in [206, 200]:
             if 'Content-Range' in response.headers:
@@ -86,7 +104,7 @@ class Downloader:
                     end = min(start + self.part_size - 1, file_size - 1)
 
                     self.headers['range'] = f'bytes={start}-{end}'
-                    part_response = requests.get(self.download_url, headers=self.headers, params=self.params)
+                    part_response = session.get(self.download_url)
 
                     if part_response.status_code in [206, 200]:
                         f.write(part_response.content)
