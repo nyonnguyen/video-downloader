@@ -13,7 +13,6 @@ class YouTubeDownloader(object):
 
     def download_yt_video(self, output_path):
         file_ext = 'mp4'
-
         # read audio_only from options
         if 'AUDIO' in self.options.resolution.name:
             file_ext = 'mp3'
@@ -44,7 +43,24 @@ class YouTubeDownloader(object):
         os.rename(video_name, file_destination)
         print(f"Downloaded video: {file_destination}")
 
+    def download_yt_playlist(self, output_path, limit):
+        play_list_path = f"{output_path}/yt-playlist-{str(uuid.uuid4())}"
+        os.mkdir(play_list_path)
+        ydl_opts = {
+            'format': self.options.resolution.value,  # Download by set resolution
+            'outtmpl': f'{play_list_path}/%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s',
+            # Name files with playlist order and title
+            'noplaylist': False,  # Ensure it's treating the URL as a playlist
+            'playlist_items': f'1-{limit}',  # Optional: Download specific range of videos
+            'download_archive': f'{play_list_path}/downloaded.txt',  # Avoid re-downloading videos
+            'quiet': False,  # Show progress in the terminal
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([self.options.download_url])
 
-    def download(self, output_path=None):
+    def download(self, output_path=None, limit=999):
         self.options.download_url = self.options.input_url
-        self.download_yt_video(output_path)
+        if 'playlist?' in self.options.download_url:
+            self.download_yt_playlist(output_path, limit)
+        else:
+            self.download_yt_video(output_path)
