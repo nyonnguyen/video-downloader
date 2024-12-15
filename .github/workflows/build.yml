@@ -42,6 +42,7 @@ jobs:
 
     - name: Build executable
       run: |
+        ./venv/Scripts/activate
         pyinstaller --onefile ${{ github.event.inputs.build_target || 'main.py' }}
 
     - name: Upload artifact
