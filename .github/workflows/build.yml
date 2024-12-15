@@ -1,0 +1,50 @@
+name: Build Executable
+
+on:
+  push:
+    branches:
+      - main  # Trigger on push to main branch
+  pull_request:
+    branches:
+      - main  # Trigger on pull requests to main branch
+  schedule:
+    - cron: '0 2 * * *'  # Runs nightly at 2:00 AM UTC
+  workflow_dispatch:  # Allows manual triggering
+    inputs:
+      build_target:
+        description: 'Build target (e.g., main.py)'
+        required: false
+        default: 'main.py'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Create and activate virtual environment
+      run: |
+        python -m venv venv
+        source ./venv/Scripts/activate
+
+    - name: Install dependencies
+      run: |
+        ./venv/Scripts/pip install --upgrade pip
+        ./venv/Scripts/pip install -r requirements.txt
+
+    - name: Build executable
+      run: |
+        pyinstaller --onefile ${{ github.event.inputs.build_target || 'main.py' }}
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: executable
+        path: dist/video-download.exe
