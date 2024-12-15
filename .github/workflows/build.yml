@@ -49,8 +49,41 @@ jobs:
       run: |
         mv dist/main.exe dist/video-download.exe
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v3
+    - name: Upload artifact (no zip)
+      uses: actions/upload-artifact@v4
       with:
-        name: executable
+        name: video-download
         path: dist/video-download.exe
+        if-no-files-found: error  # Fails the job if the file is missing
+        retention-days: 5         # Optional: Retain the artifact for 5 days
+
+    - name: Determine version tag
+      id: tag
+      run: |
+        # Auto-generate a version tag based on the current date
+        echo "TAG_NAME=v$(date +'%Y.%m.%d')" >> $GITHUB_ENV
+        echo "Generated tag: $TAG_NAME"
+
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ env.TAG_NAME }}
+        release_name: Release ${{ env.TAG_NAME }}
+        body: |
+          ### Changes
+          - Built executable for version ${{ env.TAG_NAME }}
+        draft: false
+        prerelease: false
+
+    - name: Upload to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: dist/video-download.exe
+        asset_name: video-download.exe
+        asset_content_type: application/octet-stream
