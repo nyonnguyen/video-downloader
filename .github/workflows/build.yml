@@ -60,9 +60,11 @@ jobs:
     - name: Determine version tag
       id: tag
       run: |
-        # Auto-generate a version tag based on the current date
-        echo "TAG_NAME=v$(date +'%Y.%m.%d')" >> $GITHUB_ENV
-        echo "TAG_NAME=${{ env.TAG_NAME }}"
+        # Auto-generate a version tag using PowerShell on Windows
+        $date = Get-Date -Format "yyyy.MM.dd"
+        echo "TAG_NAME=v$date" >> $env:GITHUB_ENV
+        echo "Generated tag: v$date"
+      shell: pwsh
 
     - name: Create GitHub Release
       id: create_release
