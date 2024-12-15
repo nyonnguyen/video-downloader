@@ -45,6 +45,10 @@ jobs:
         ./venv/Scripts/activate
         pyinstaller --onefile ${{ github.event.inputs.build_target || 'main.py' }}
 
+    - name: Rename built file
+      run: |
+        mv dist/main.exe dist/video-download.exe
+
     - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
