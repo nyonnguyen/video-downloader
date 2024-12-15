@@ -62,7 +62,7 @@ jobs:
       run: |
         # Auto-generate a version tag based on the current date
         echo "TAG_NAME=v$(date +'%Y.%m.%d')" >> $GITHUB_ENV
-        echo "Generated tag: $TAG_NAME"
+        echo "TAG_NAME=${{ env.TAG_NAME }}"
 
     - name: Create GitHub Release
       id: create_release
@@ -70,7 +70,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ env.TAG_NAME }}
+        tag_name: ${{ env.TAG_NAME }} # Use the dynamically created tag
         release_name: Release ${{ env.TAG_NAME }}
         body: |
           ### Changes
