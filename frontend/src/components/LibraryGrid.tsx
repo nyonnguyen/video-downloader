@@ -495,15 +495,35 @@ function MediaPreview({
   }, [activeSubId, subs]);
 
   // Audio switch: mute the video and slave a hidden <audio> to its timeline.
+  // The <audio> element is freshly mounted whenever activeAudioId changes, so
+  // we drive the initial sync+play from this effect directly (not from React's
+  // onCanPlay synthetic event, which races the mount and can be missed).
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
+    const a = audioRef.current;
     if (activeAudioId === null) {
       v.muted = false;
-      const a = audioRef.current;
       if (a) { try { a.pause(); } catch {} }
+      return;
+    }
+    v.muted = true;
+    if (!a) return;
+
+    const sync = () => {
+      try { a.currentTime = v.currentTime; } catch {}
+      a.volume = v.volume;
+      a.playbackRate = v.playbackRate;
+      if (!v.paused) {
+        a.play().catch((err) => console.warn("Alt audio play failed:", err));
+      }
+    };
+
+    if (a.readyState >= 1 /* HAVE_METADATA */) {
+      sync();
     } else {
-      v.muted = true;
+      a.addEventListener("loadedmetadata", sync, { once: true });
+      return () => a.removeEventListener("loadedmetadata", sync);
     }
   }, [activeAudioId]);
 
@@ -512,7 +532,7 @@ function MediaPreview({
     const v = videoRef.current;
     if (!a || !v || activeAudioId === null) return;
     if (Math.abs(a.currentTime - v.currentTime) > 0.15) a.currentTime = v.currentTime;
-    a.play().catch(() => {});
+    a.play().catch((err) => console.warn("Alt audio play failed:", err));
   }
   function onVidPause() {
     const a = audioRef.current;
@@ -523,7 +543,7 @@ function MediaPreview({
     const v = videoRef.current;
     if (a && v && activeAudioId !== null) {
       a.currentTime = v.currentTime;
-      if (!v.paused) a.play().catch(() => {});
+      if (!v.paused) a.play().catch((err) => console.warn("Alt audio play failed:", err));
     }
   }
   function onVidTimeUpdate() {
@@ -543,15 +563,6 @@ function MediaPreview({
     const a = audioRef.current;
     const v = videoRef.current;
     if (a && v && activeAudioId !== null) a.volume = v.volume;
-  }
-  function onAltAudioReady() {
-    const a = audioRef.current;
-    const v = videoRef.current;
-    if (!a || !v) return;
-    a.currentTime = v.currentTime;
-    a.volume = v.volume;
-    a.playbackRate = v.playbackRate;
-    if (!v.paused) a.play().catch(() => {});
   }
 
   return (
@@ -601,7 +612,6 @@ function MediaPreview({
                 src={api.streamUrl(activeAudioId)}
                 preload="auto"
                 className="hidden"
-                onCanPlay={onAltAudioReady}
               />
             )}
             {audioTracks.length > 0 && (
