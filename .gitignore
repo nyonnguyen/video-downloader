@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+venv/
+.venv/
+venv-py39-backup/
+.python-version
+
+# Node
+node_modules/
+frontend/dist/
+frontend/*.tsbuildinfo
+backend/static/
+
+# Runtime data
+data/app.db
+data/app.db-journal
+data/app.db-wal
+data/app.db-shm
+data/downloads/
+data/converted/
+data/subtitles/
+data/models/
+data/archive/
+data/thumbnails/
+
+# IDE / OS
+.idea/
+.vscode/
+.claude/
+.DS_Store
+
+# Plan/agent artifacts
+media_ai_toolkit_summary.md
+*.mp3.parts/
